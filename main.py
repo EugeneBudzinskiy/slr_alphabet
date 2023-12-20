@@ -21,20 +21,14 @@ def load_label_decode_inverse_dict() -> list[str]:
 def main():
     label_decode_inv = load_label_decode_inverse_dict()
     model = tf.keras.models.load_model(config.MODEL_PATH, compile=False)
+    prediction = None
 
     stream = cv2.VideoCapture(0)
-
     frame_step = stream.get(cv2.CAP_PROP_FPS) // config.N_FRAMES_PER_SECOND
     frame_index = 0
     while stream.isOpened():
         has_next, frame = stream.read()
         frame = cv2.flip(frame, 1)
-        cv2.imshow('frame', frame)
-
-        key = cv2.waitKey(100) & 0xFF
-        if key == ord('q'):
-            break
-
         if has_next:
             if (frame_index + 1) % frame_step == 0:
                 frame_index = 0
@@ -44,21 +38,32 @@ def main():
                 ms = min(width, height)
                 x_off, y_off = (width - ms) // 2, (height - ms) // 2
                 image = image.crop(box=(x_off, y_off, x_off + ms, y_off + ms))
-
-                # noinspection PyTypeChecker
-                nn_frame = np.asarray(image)
-                cv2.imshow('NN view', cv2.cvtColor(nn_frame, cv2.COLOR_RGB2BGR))
-
                 image = image.resize(size=(config.IMAGE_SIZE, config.IMAGE_SIZE), resample=3)
 
                 # noinspection PyTypeChecker
                 data = np.expand_dims(np.asarray(image, dtype="uint8"), axis=0)
+                prediction = np.argmax(model.predict(data, verbose=0))
 
-                prediction = np.argmax(model.predict(data, verbose=0), axis=-1)
-                print(label_decode_inv[int(prediction)])
             frame_index += 1
         else:
             break
+
+        key = cv2.waitKey(100) & 0xFF
+        if key == ord('q'):
+            break
+
+        text_result = "" if prediction is None else label_decode_inv[prediction]
+        cv2.putText(
+            img=frame,
+            text=text_result,
+            org=(0, 128),
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=4,
+            color=(255, 255, 0),
+            thickness=5
+        )
+        cv2.imshow('Result', frame)
+
     stream.release()
     cv2.destroyAllWindows()
 

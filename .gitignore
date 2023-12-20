@@ -1,9 +1,11 @@
-/model.h5
+/venv/
 
-/dataset/test
-/dataset/train
+/model.h5
 
 /dataset_raw/Test_Alphabet/
 /dataset_raw/Train_Alphabet/
 
-/venv/
+/dataset/train/label.npy
+/dataset/train/data.dat
+/dataset/test/label.npy
+/dataset/test/data.dat
