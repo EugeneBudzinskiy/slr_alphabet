@@ -10,6 +10,9 @@ BATCH_SIZE = 30
 NUMBER_OF_CLASSES = 27  # Number of classes to predict
 N_FRAMES_PER_SECOND = 6  # Process only N frames per second from video feed
 
+ALPHABET_IMAGES_PATH = "alphabet_images"
+ALPHABET_IMAGES_EXTENSION = "png"
+
 
 
 # ===============
